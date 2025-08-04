@@ -9,10 +9,10 @@ env/
 
 # Кэш
 __pycache__/
+*.cache
 *.pyc
 *.pyo
 *.pyd
 
-
+# Журналирование
 *.log
-*.cache
