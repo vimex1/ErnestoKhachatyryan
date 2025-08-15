@@ -18,7 +18,6 @@ async def get_all_products(db: Annotated[Session, Depends(get_db)]):
     return products
 
 
-# TODO: Добавить обработку отсутствия категории
 @router.post("/create", status_code=status.HTTP_201_CREATED)
 async def create_product(
     db: Annotated[Session, Depends(get_db)], create_product: CreateProduct

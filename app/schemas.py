@@ -1,13 +1,14 @@
 from pydantic import BaseModel
+from typing import List
 
 
 class CreateProduct(BaseModel):
     name: str
     description: str
     price: int
-    image_url: str
+    image_url: str | None = "Missing image URL"
     stock: int
-    category: int
+    category_id: int
 
 
 class CreateCategory(BaseModel):
