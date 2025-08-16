@@ -11,10 +11,7 @@ import jwt
 from app.models.user import User
 from app.schemas import CreateUser
 from app.backend.db_depends import get_db
-
-
-SECRET_KEY = "e3c5d17c7b01f47b5ad3e1b98250fa437fe8d6b7b1ff74fdc16ef5dbd2f82a77"
-ALGORITHM = "HS256"
+from app.backend.config import SECRET_KEY, ALGORITHM
 
 
 router = APIRouter(prefix="/auth", tags=["auth"])
