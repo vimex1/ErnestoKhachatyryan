@@ -151,7 +151,10 @@ async def product_detail(
     product = await db.scalar(select(Product).where(Product.slug == product_slug))
 
     if not product:
-        raise HTTPException(status_code=404, detail="Product not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, 
+            detail="Product not found"
+            )
 
     return {"status_code": status.HTTP_200_OK, "response": product}
 
@@ -169,7 +172,10 @@ async def update_product(
         )
 
         if not product:
-            raise HTTPException(status_code=404, detail="Product not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, 
+                detail="Product not found"
+                )
 
         product.name = update_product.name
         product.description = update_product.description
@@ -202,7 +208,10 @@ async def delete_product(
         product = await db.scalar(select(Product).where(Product.slug == product_slug))
 
         if not product:
-            raise HTTPException(status_code=404, detail="Product not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, 
+                detail="Product not found"
+                )
 
         product.is_active = False
 

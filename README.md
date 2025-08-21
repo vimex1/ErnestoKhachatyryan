@@ -14,6 +14,8 @@
 - SQLAlchemy
 - Alembic
 - Pydantic
+- JWT
+- OAuth2
 
 ## Планы по развитию
 
