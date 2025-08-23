@@ -1,20 +1,25 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
-from backend.middleware import TimingMiddleware
+from app.routers import permission
 from app.routers import category
 from app.routers import products
 from app.routers import auth
-from app.routers import permission
 from app.routers import reviews
+from .log import log_middleware
 
 
-app = FastAPI()
+app = FastAPI(
+    title="FastAPI Ernesto Khachatyryan ", 
+    description="Магазин мужской одежды"
+)
 
 origins = [
-    "http://localhost:3000"
+    "http://localhost:8000"
 ]
+
+
+app.middleware("http")(log_middleware)
 
 app.add_middleware(
     CORSMiddleware,
@@ -29,25 +34,18 @@ app.add_middleware(
     allowed_hosts=[
         "localhost",
         "127.0.0.1",
-        "localhost:3000",
-        "127.0.0.1:3000",
-        "futuredomain.com",         # будущий домен
-        "*.futuredomain.com",       # поддомены
-    ]
-)
-
-app.add_middleware(
-    HTTPSRedirectMiddleware
-)
-
-app.add_middleware(
-    TimingMiddleware
+        "localhost:8000",
+        "127.0.0.1:8000",
+        "127.0.0.1:8000/docs",
+        "futuredomain.com",  # будущий домен
+        "*.futuredomain.com",  # поддомены
+    ],
 )
 
 
-@app.get('/')
+@app.get("/")
 async def welcome() -> dict:
-    return {'message': 'Добро пожаловать в магазин Ernesto Khachatyryan'}
+    return {"message": "Добро пожаловать в магазин Ernesto Khachatyryan"}
 
 
 app.include_router(category.router)

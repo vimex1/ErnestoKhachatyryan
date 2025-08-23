@@ -17,4 +17,5 @@ __pycache__/
 # Журналирование
 *.log
 
+#Изображения
 .database_schema.png
