@@ -12,6 +12,9 @@ from app.schemas import CreateReview
 router = APIRouter(prefix="/reviews", tags=["reviews"])
 
 
+async def update_rating() -> None:
+    pass
+
 @router.get("/")
 async def all_reviews(db: Annotated[AsyncSession, Depends(get_db)]):
     reviews = await db.scalars(select(Review).where(Product.is_active == True))
@@ -111,6 +114,8 @@ async def delete_reviews(
 
         review.is_active = False
 
+        # Вывести в отдельную функцию
+        #-------------vvv-------------
         product = await db.scalar(
             select(Product).where(Product.id == review.product_id, Product.is_active == True)
         )
@@ -123,6 +128,7 @@ async def delete_reviews(
         all_grades = [grade.grade for grade in grades.all()]
 
         product.rating = round(sum(all_grades) / len(all_grades), 2)
+        #-------------^^^-------------
 
         db.add(product)
         await db.commit()
