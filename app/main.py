@@ -6,6 +6,7 @@ from app.routers import category
 from app.routers import products
 from app.routers import auth
 from app.routers import reviews
+from tests import test_endpoints
 from .log import log_middleware
 
 
@@ -53,3 +54,4 @@ app.include_router(products.router)
 app.include_router(auth.router)
 app.include_router(permission.router)
 app.include_router(reviews.router)
+app.include_router(test_endpoints.router)
