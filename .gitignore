@@ -19,3 +19,8 @@ __pycache__/
 
 #Изображения
 .database_schema.png
+
+# Блокноты
+*.txt
+
+.*
