@@ -16,6 +16,12 @@ router = APIRouter(prefix="/categories", tags=["category"])
 
 @router.get("/all", status_code=status.HTTP_200_OK)
 async def get_all_categories(db: Annotated[AsyncSession, Depends(get_db)]):
+    """
+    Получить все активные категории.
+    
+    Returns:
+        list: Список всех активных категорий
+    """
     categories = await db.scalars(select(Category).where(Category.is_active == True))
     return categories.all()
 
@@ -26,6 +32,22 @@ async def create_category(
     get_user: Annotated[dict, Depends(get_current_user)],
     create_category: CreateCategory,
 ):
+    """
+    Создать новую категорию.
+    
+    Требует права администратора.
+    
+    Args:
+        db: Сессия базы данных
+        get_user: Текущий аутентифицированный пользователь
+        create_category: Данные для создания категории
+        
+    Returns:
+        dict: Статус операции создания
+        
+    Raises:
+        HTTPException: Если у пользователя нет прав администратора
+    """
     if get_user.get("is_admin"):
         await db.execute(
             insert(Category).values(
@@ -55,6 +77,23 @@ async def update_category(
     category_slug: str,
     update_category: CreateCategory,
 ):
+    """
+    Обновить существующую категорию по slug.
+    
+    Требует права администратора.
+    
+    Args:
+        db: Сессия базы данных
+        get_user: Текущий аутентифицированный пользователь
+        category_slug: Slug категории для обновления
+        update_category: Новые данные категории
+        
+    Returns:
+        dict: Статус операции обновления
+        
+    Raises:
+        HTTPException: Если категория не найдена или у пользователя нет прав администратора
+    """
     if get_user.get('is_admin'):
         category = await db.scalar(
             select(Category).where(
@@ -91,6 +130,22 @@ async def delete_category(
     get_user: Annotated[dict, Depends(get_current_user)],
     category_slug: str,
 ):
+    """
+    Удалить категорию по slug (деактивировать).
+    
+    Требует права администратора. Категория помечается как неактивная.
+    
+    Args:
+        db: Сессия базы данных
+        get_user: Текущий аутентифицированный пользователь
+        category_slug: Slug категории для удаления
+        
+    Returns:
+        dict: Статус операции удаления
+        
+    Raises:
+        HTTPException: Если категория не найдена или у пользователя нет прав администратора
+    """
     if get_user.get('is_admin'):
         category = await db.scalar(
             select(Category).where(

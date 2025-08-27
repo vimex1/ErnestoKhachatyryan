@@ -17,6 +17,18 @@ async def update_rating() -> None:
 
 @router.get("/")
 async def all_reviews(db: Annotated[AsyncSession, Depends(get_db)]):
+    """
+    Получить все активные отзывы.
+    
+    Args:
+        db: Сессия базы данных
+        
+    Returns:
+        dict: Статус и список всех активных отзывов
+        
+    Raises:
+        HTTPException: Если отзывы не найдены
+    """
     reviews = await db.scalars(select(Review).where(Product.is_active == True))
     all_reviews = reviews.all()
 
@@ -32,6 +44,19 @@ async def all_reviews(db: Annotated[AsyncSession, Depends(get_db)]):
 async def products_reviews(
     db: Annotated[AsyncSession, Depends(get_db)], product_id: int
 ):
+    """
+    Получить все отзывы для конкретного продукта.
+    
+    Args:
+        db: Сессия базы данных
+        product_id: ID продукта
+        
+    Returns:
+        dict: Статус и список отзывов для продукта
+        
+    Raises:
+        HTTPException: Если отзывы для продукта не найдены
+    """
     products_reviews = await db.scalars(
         select(Review).where(Review.product_id == product_id, Review.is_active == True)
     )
@@ -53,6 +78,23 @@ async def add_review(
     product_id: int,
     create_review: CreateReview,
 ):
+    """
+    Добавить новый отзыв к продукту.
+    
+    Требует права покупателя. Автоматически обновляет рейтинг продукта.
+    
+    Args:
+        db: Сессия базы данных
+        get_user: Текущий аутентифицированный пользователь
+        product_id: ID продукта для отзыва
+        create_review: Данные отзыва
+        
+    Returns:
+        dict: Статус операции создания отзыва
+        
+    Raises:
+        HTTPException: Если продукт не найден, оценка некорректна или у пользователя нет прав покупателя
+    """
     if get_user.get("is_customer"):
         product = await db.scalar(
             select(Product).where(Product.id == product_id, Product.is_active == True)
@@ -107,6 +149,23 @@ async def delete_reviews(
     get_user: Annotated[dict, Depends(get_current_user)],
     review_id: int,
 ):
+    """
+    Удалить отзыв (деактивировать).
+    
+    Требует права администратора. Отзыв помечается как неактивный.
+    Автоматически пересчитывает рейтинг продукта.
+    
+    Args:
+        db: Сессия базы данных
+        get_user: Текущий аутентифицированный пользователь
+        review_id: ID отзыва для удаления
+        
+    Returns:
+        dict: Статус операции удаления отзыва
+        
+    Raises:
+        HTTPException: Если у пользователя нет прав администратора
+    """
     if get_user.get("is_admin"):
         review = await db.scalar(
             select(Review).where(Review.id == review_id, Review.is_active == True)

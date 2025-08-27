@@ -19,6 +19,22 @@ async def supplier_permission(
     get_user: Annotated[dict, Depends(get_current_user)],
     user_id: int,
 ):
+    """
+    Изменить права пользователя на поставщика/покупателя.
+    
+    Требует права администратора. Переключает статус пользователя между поставщиком и покупателем.
+    
+    Args:
+        db: Сессия базы данных
+        get_user: Текущий аутентифицированный пользователь
+        user_id: ID пользователя для изменения прав
+        
+    Returns:
+        dict: Статус операции и описание изменений
+        
+    Raises:
+        HTTPException: Если пользователь не найден или у текущего пользователя нет прав администратора
+    """
     if get_user.get("is_admin"):
         user = await db.scalar(select(User).where(User.id == user_id))
 
@@ -61,6 +77,23 @@ async def delete_user(
     get_user: Annotated[dict, Depends(get_current_user)],
     user_id: int,
 ):
+    """
+    Удалить пользователя (деактивировать).
+    
+    Требует права администратора. Пользователь помечается как неактивный.
+    Администраторов удалять нельзя.
+    
+    Args:
+        db: Сессия базы данных
+        get_user: Текущий аутентифицированный пользователь
+        user_id: ID пользователя для удаления
+        
+    Returns:
+        dict: Статус операции удаления
+        
+    Raises:
+        HTTPException: Если пользователь не найден, является администратором или у текущего пользователя нет прав администратора
+    """
     if get_user.get("is_admin"):
         user = await db.scalar(select(User).where(User.id == user_id))
 

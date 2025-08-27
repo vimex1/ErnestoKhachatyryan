@@ -143,7 +143,6 @@ async def get_system_info():
         "features": [
             "Redis кеширование",
             "Celery фоновые задачи", 
-            "Email рассылка",
             "PostgreSQL база данных"
         ],
         "test_endpoints": [

@@ -16,6 +16,18 @@ router = APIRouter(prefix="/products", tags=["products"])
 async def get_all_products(
     db: Annotated[AsyncSession, Depends(get_db)]
 ):
+    """
+    Получить все активные продукты.
+    
+    Args:
+        db: Сессия базы данных
+        
+    Returns:
+        dict: Статус и список всех активных продуктов
+        
+    Raises:
+        HTTPException: Если продукты не найдены
+    """
     products = await db.scalars(select(Product).where(Product.is_active == True))
     all_products = products.all()
 
@@ -33,6 +45,22 @@ async def create_product(
     get_user: Annotated[dict, Depends(get_current_user)],
     create_product: CreateProduct,
 ):
+    """
+    Создать новый продукт.
+    
+    Требует права администратора или поставщика.
+    
+    Args:
+        db: Сессия базы данных
+        get_user: Текущий аутентифицированный пользователь
+        create_product: Данные для создания продукта
+        
+    Returns:
+        dict: Статус операции создания
+        
+    Raises:
+        HTTPException: Если категория не найдена или у пользователя нет необходимых прав
+    """
     if get_user.get('is_admin') or get_user.get('is_supplier'):
         category = await db.scalar(
             select(Category).where(
@@ -78,7 +106,19 @@ async def products_by_category(
     db: Annotated[AsyncSession, Depends(get_db)],
     category_slug: str,
 ):
-
+    """
+    Получить продукты по категории с построением дерева категорий.
+    
+    Args:
+        db: Сессия базы данных
+        category_slug: Slug категории
+        
+    Returns:
+        dict: Статус и структурированные продукты по категориям
+        
+    Raises:
+        HTTPException: Если категория не найдена
+    """
     category = await db.scalar(select(Category).where(Category.slug == category_slug))
 
     if category is None:
@@ -148,6 +188,19 @@ async def product_detail(
     db: Annotated[AsyncSession, Depends(get_db)],
     product_slug: str,
 ):
+    """
+    Получить детальную информацию о продукте по slug.
+    
+    Args:
+        db: Сессия базы данных
+        product_slug: Slug продукта
+        
+    Returns:
+        dict: Статус и детальная информация о продукте
+        
+    Raises:
+        HTTPException: Если продукт не найден
+    """
     product = await db.scalar(select(Product).where(Product.slug == product_slug))
 
     if not product:
@@ -166,6 +219,23 @@ async def update_product(
     product_slug: str,
     update_product: CreateProduct,
 ):
+    """
+    Обновить существующий продукт по slug.
+    
+    Требует права администратора или поставщика.
+    
+    Args:
+        db: Сессия базы данных
+        get_user: Текущий аутентифицированный пользователь
+        product_slug: Slug продукта для обновления
+        update_product: Новые данные продукта
+        
+    Returns:
+        dict: Статус операции обновления
+        
+    Raises:
+        HTTPException: Если продукт не найден или у пользователя нет необходимых прав
+    """
     if get_user.get('is_admin') or get_user.get('is_supplier'):
         product = await db.scalar(
             select(Product).where(Product.slug == product_slug, Product.is_active == True)
@@ -204,6 +274,22 @@ async def delete_product(
     get_user: Annotated[dict, Depends(get_current_user)],
     product_slug: str,
 ):
+    """
+    Удалить продукт по slug (деактивировать).
+    
+    Требует права администратора или поставщика. Продукт помечается как неактивный.
+    
+    Args:
+        db: Сессия базы данных
+        get_user: Текущий аутентифицированный пользователь
+        product_slug: Slug продукта для удаления
+        
+    Returns:
+        dict: Статус операции удаления
+        
+    Raises:
+        HTTPException: Если продукт не найден или у пользователя нет необходимых прав
+    """
     if get_user.get('is_admin') or get_user.get('is_supplier'):
         product = await db.scalar(select(Product).where(Product.slug == product_slug))
 

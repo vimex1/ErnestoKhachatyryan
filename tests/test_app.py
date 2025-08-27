@@ -1,9 +1,3 @@
-#!/usr/bin/env python3
-"""
-Простой скрипт для тестирования FastAPI приложения
-Запустите его после запуска основного приложения
-"""
-
 import requests
 import time
 import json

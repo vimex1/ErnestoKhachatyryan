@@ -28,6 +28,20 @@ async def create_access_token(
     is_customer: bool,
     expires_delta: timedelta,
 ):
+    """
+    Создать JWT токен доступа для пользователя.
+    
+    Args:
+        username: Имя пользователя
+        user_id: ID пользователя
+        is_admin: Права администратора
+        is_supplier: Права поставщика
+        is_customer: Права покупателя
+        expires_delta: Время жизни токена
+        
+    Returns:
+        str: Закодированный JWT токен
+    """
     payload = {
         "sub": username,
         "id": user_id,
@@ -43,6 +57,18 @@ async def create_access_token(
 
 
 async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
+    """
+    Получить текущего пользователя из JWT токена.
+    
+    Args:
+        token: JWT токен из заголовка Authorization
+        
+    Returns:
+        dict: Информация о пользователе
+        
+    Raises:
+        HTTPException: Если токен недействителен или истек
+    """
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str | None = payload.get('sub')
@@ -80,6 +106,20 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
 async def authenticate_user(
     db: Annotated[AsyncSession, Depends(get_db)], username: str, password: str
 ):
+    """
+    Аутентифицировать пользователя по имени и паролю.
+    
+    Args:
+        db: Сессия базы данных
+        username: Имя пользователя
+        password: Пароль пользователя
+        
+    Returns:
+        User: Объект пользователя если аутентификация успешна
+        
+    Raises:
+        HTTPException: Если учетные данные неверны или пользователь неактивен
+    """
     user = await db.scalar(select(User).where(User.username == username))
 
     if (
@@ -99,6 +139,16 @@ async def authenticate_user(
 async def create_user(
     db: Annotated[AsyncSession, Depends(get_db)], create_user: CreateUser
 ):
+    """
+    Создать нового пользователя.
+    
+    Args:
+        db: Сессия базы данных
+        create_user: Данные для создания пользователя
+        
+    Returns:
+        dict: Статус операции создания пользователя
+    """
     await db.execute(
         insert(User).values(
             first_name=create_user.first_name,
@@ -117,6 +167,19 @@ async def login(
     db: Annotated[AsyncSession, Depends(get_db)],
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
 ):
+    """
+    Аутентификация пользователя и получение JWT токена.
+    
+    Args:
+        db: Сессия базы данных
+        form_data: Форма с учетными данными пользователя
+        
+    Returns:
+        dict: JWT токен доступа и его тип
+        
+    Raises:
+        HTTPException: Если учетные данные неверны
+    """
     user = await authenticate_user(db, form_data.username, form_data.password)
 
     token = await create_access_token(
@@ -133,4 +196,13 @@ async def login(
 
 @router.get('/read_current_user')
 async def read_current_user(user: dict = Depends(get_current_user)):
+    """
+    Получить информацию о текущем аутентифицированном пользователе.
+    
+    Args:
+        user: Текущий пользователь из токена
+        
+    Returns:
+        dict: Информация о текущем пользователе
+    """
     return {'User': user}
